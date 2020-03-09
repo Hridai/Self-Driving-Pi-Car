@@ -8,33 +8,35 @@ if __name__ == '__main__':
     tcp = TCPClient()
     cmd = command()
     bConnected = False
+    #### uncomment the below lines to interact with the car over TCP
+    #### these have been commented out in the absence of the car itself to test its interactino with a TF NN
+    #### Note this needs testing with py3.7!!
+#    tcp.sendData(cmd.LED_BLUE.encode())
+#    tcp.sendData(cmd.LED_RED.encode())
+#    tcp.sendData(cmd.LED_GREEN.encode())
     
-    tcp.sendData(cmd.LED_BLUE.encode())
-    tcp.sendData(cmd.LED_RED.encode())
-    tcp.sendData(cmd.LED_GREEN.encode())
-    
-    try:
-        tcp.connectToServer(address = ("192.168.1.157", 12345))
-        bConnected = True
-        #tcp.sendData(">RGB Blue".encode())
-    except Exception:
-        print("Connect to server Failed!: Check the Server IP is correct and open!")
+#    try:
+#        tcp.connectToServer(address = ("192.168.1.157", 12345))
+    bConnected = True
+#        #tcp.sendData(">RGB Blue".encode())
+#    except Exception:
+#        print("Connect to server Failed!: Check the Server IP is correct and open!")
     
     while bConnected:
         ret, frame = cap.read()
         gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
         faces = cv2.CascadeClassifier('haarcascade_frontalface_default.xml').detectMultiScale(gray, 1.3,5)
         for (x, y, w, h) in faces:
-            cv2.rectangle(frame, (x, ys), (x+w, y+h), (255, 255, 0), 2)
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 255, 0), 2)
             roi_gray = gray[y:y+h, x:x+w]
             roi_color = frame[y:y+h, x:x+w]
             eyes = cv2.CascadeClassifier('haarcascade_eye.xml').detectMultiScale(roi_gray)
             for (ex,ey,ew,eh) in eyes:
                 cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-            tcp.sendData(cmd.MOVE_FWD.encode())
+#            tcp.sendData(cmd.MOVE_FWD.encode())
         cv2.imshow('Anything',frame)
-        if type(faces) is tuple: # This means no face is detected in this loop
-            tcp.sendData(cmd.MOVE_STOP.encode())
+#        if type(faces) is tuple: # This means no face is detected in this loop
+#            tcp.sendData(cmd.MOVE_STOP.encode())
         if cv2.waitKey(1) & 0xFF == ord('q'):
             tcp.disConnect()
             break
